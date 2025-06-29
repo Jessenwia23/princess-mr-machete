@@ -10,6 +10,27 @@
   <div class="container">
     <h1>The Princess and Mr Machete</h1>
     <h3>Ecclesiastes 4:12 – "And though a man might prevail against one who is alone, two will withstand him—a threefold cord is not quickly broken."</h3>
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCmgiOgNife84aqECuBMof3Hjx-iNy8NPQ",
+  authDomain: "princessmrmacheteapp.firebaseapp.com",
+  projectId: "princessmrmacheteapp",
+  storageBucket: "princessmrmacheteapp.firebasestorage.app",
+  messagingSenderId: "397581062474",
+  appId: "1:397581062474:web:dadc5ce6378abefad0f1b3",
+  measurementId: "G-G90TVY0ZCF"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
     <script src="script.js"></script>
   </div>
 </body>
