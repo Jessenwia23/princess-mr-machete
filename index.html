@@ -1,45 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Princess and Mr Machete</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="container">
-    <h1>The Princess and Mr Machete</h1>
-    <h3>Ecclesiastes 4:12 – "And though a man might prevail against one who is alone, two will withstand him—a threefold cord is not quickly broken."</h3>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    <!-- Your interactive content goes here (wheel, journal, etc.) -->
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmgiOgNife84aqECuBMof3Hjx-iNy8NPQ",
+    authDomain: "princessmrmacheteapp.firebaseapp.com",
+    projectId: "princessmrmacheteapp",
+    storageBucket: "princessmrmacheteapp.appspot.com",
+    messagingSenderId: "397581062474",
+    appId: "1:397581062474:web:dadc5ce6378abefad0f1b3",
+    measurementId: "G-G90TVY0ZCF"
+  };
 
-  </div>
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+  window.db = db;
 
-  <!-- Firebase SDKs and Config -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  // Load Bible Journal Entries
+  const bibleJournalEntries = document.getElementById("bibleJournalEntries");
+  getDocs(collection(db, "bibleJournal")).then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const entry = document.createElement("div");
+      entry.innerHTML = `<strong>${data.verse}</strong><p>${data.note}</p>`;
+      bibleJournalEntries.appendChild(entry);
+    });
+  });
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCmgiOgNife84aqECuBMof3Hjx-iNy8NPQ",
-      authDomain: "princessmrmacheteapp.firebaseapp.com",
-      projectId: "princessmrmacheteapp",
-      storageBucket: "princessmrmacheteapp.appspot.com",
-      messagingSenderId: "397581062474",
-      appId: "1:397581062474:web:dadc5ce6378abefad0f1b3",
-      measurementId: "G-G90TVY0ZCF"
-    };
+  // Load Prayer Warrior Entries
+  const prayerWarriorList = document.getElementById("prayerWarriorList");
+  getDocs(collection(db, "prayerWarrior")).then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const entry = document.createElement("div");
+      entry.innerHTML = `<h4>${data.title}</h4><p><strong>${data.verse}</strong></p><small>${data.note}</small>`;
+      prayerWarriorList.appendChild(entry);
+    });
+  });
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const db = getFirestore(app);
+  // Load Personal Prayers
+  const prayerList = document.getElementById("prayerList");
+  getDocs(collection(db, "prayers")).then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const item = document.createElement("li");
+      item.textContent = data.prayer;
+      prayerList.appendChild(item);
+    });
+  });
 
-    // Expose db for use in other scripts
-    window.db = db;
-  </script>
-
-  <!-- Your main JavaScript file -->
-  <script src="script.js"></script>
-</body>
-</html>
+  // Load Christian Songs
+  const songList = document.getElementById("songList");
+  getDocs(collection(db, "songs")).then(snapshot => {
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const item = document.createElement("li");
+      item.innerHTML = `<a href="${data.link}" target="_blank">${data.title}</a>`;
+      songList.appendChild(item);
+    });
+  });
+</script>
+<script src="script.js"></script>
