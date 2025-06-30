@@ -1,169 +1,105 @@
-console.log("Welcome to The Princess and Mr Machete app");
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyCmgiOgNife84aqECuBMof3Hjx-iNy8NPQ",
+  authDomain: "princessmrmacheteapp.firebaseapp.com",
+  projectId: "princessmrmacheteapp",
+  storageBucket: "princessmrmacheteapp.appspot.com",
+  messagingSenderId: "397581062474",
+  appId: "1:397581062474:web:dadc5ce6378abefad0f1b3",
+  measurementId: "G-G90TVY0ZCF"
+};
 
-document.getElementById("bibleJournalForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const verse = document.getElementById("bibleVerse").value.trim();
-  const note = document.getElementById("bibleNote").value.trim();
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
 
-  if (verse && note) {
-    await addDoc(collection(window.db, "bibleJournal"), {
-      verse,
-      note,
-      timestamp: Date.now()
-    });
-    alert("Entry saved to Firebase!");
-    bibleJournalForm.reset();
-  }
+// 🔁 Utility: Load documents from Firestore collection
+async function loadCollection(colName, handler) {
+  const snapshot = await getDocs(collection(db, colName));
+  snapshot.forEach(doc => handler(doc.data()));
+}
 
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-// COUPLE JOURNAL
-document.getElementById("journalForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = journalTitle.value.trim();
-  const text = journalText.value.trim();
-  if (title && text) {
-    const entry = document.createElement("div");
-    entry.innerHTML = `<h3>${title}</h3><p>${text}</p>`;
-    journalEntries.prepend(entry);
-    journalForm.reset();
-    await addDoc(collection(window.db, "coupleJournal"), { title, text, timestamp: Date.now() });
-  }
+// 📓 Bible Journal
+loadCollection("bibleJournal", data => {
+  const div = document.createElement("div");
+  div.innerHTML = `<strong>${data.verse}</strong><p>${data.note}</p>`;
+  document.getElementById("bibleJournalEntries").appendChild(div);
 });
 
-// TIMELINE
-document.getElementById("timelineForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = achievementTitle.value.trim();
-  const date = achievementDate.value;
-  if (title && date) {
-    const item = document.createElement("li");
-    item.innerHTML = `<strong>${title}</strong><br><small>${new Date(date).toDateString()}</small>`;
-    let inserted = false;
-    Array.from(timelineList.children).forEach((el, i) => {
-      const curDate = new Date(el.querySelector("small").textContent);
-      if (new Date(date) < curDate && !inserted) {
-        timelineList.insertBefore(item, el);
-        inserted = true;
-      }
-    });
-    if (!inserted) timelineList.appendChild(item);
-    timelineForm.reset();
-    await addDoc(collection(window.db, "achievements"), { title, date, timestamp: Date.now() });
-  }
+// 🛡 Prayer Warrior
+loadCollection("prayerWarrior", data => {
+  const div = document.createElement("div");
+  div.innerHTML = `<strong>${data.title}</strong><p>${data.verse}</p><em>${data.note}</em>`;
+  document.getElementById("prayerWarriorList").appendChild(div);
 });
 
-// WISHLIST
-document.getElementById("wishlistForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = wishlistTitle.value.trim();
-  const link = wishlistLink.value.trim();
-  const note = wishlistNote.value.trim();
-  if (title && link) {
-    const item = document.createElement("li");
-    item.innerHTML = `<strong><a href="${link}" target="_blank">${title}</a></strong>${note ? `<br><small>${note}</small>` : ""}`;
-    wishlistItems.appendChild(item);
-    wishlistForm.reset();
-    await addDoc(collection(window.db, "wishlist"), { title, link, note, timestamp: Date.now() });
-  }
+// 🙏 Personal Prayers
+loadCollection("prayers", data => {
+  const li = document.createElement("li");
+  li.textContent = data.prayer;
+  document.getElementById("prayerList").appendChild(li);
 });
 
-// SAVINGS
-document.getElementById("savingsForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const goal = savingsGoal.value.trim();
-  const target = parseFloat(savingsTarget.value);
-  const current = parseFloat(savingsCurrent.value);
-  if (goal && !isNaN(target) && !isNaN(current)) {
-    const percent = Math.min((current / target) * 100, 100);
-    const div = document.createElement("div");
-    div.innerHTML = `<h3>${goal}</h3><div style="background:#eee;"><div style="width:${percent}%;background:#a45ee5;color:#fff;padding:10px;">£${current} / £${target} (${percent.toFixed(1)}%)</div></div>`;
-    savingsTracker.innerHTML = "";
-    savingsTracker.appendChild(div);
-    savingsForm.reset();
-    await addDoc(collection(window.db, "savings"), { goal, target, current, timestamp: Date.now() });
-  }
+// 🎶 Christian Songs
+loadCollection("songs", data => {
+  const li = document.createElement("li");
+  li.innerHTML = `<a href="\${data.link}" target="_blank">${data.title}</a>`;
+  document.getElementById("songList").appendChild(li);
 });
 
-// LEADERBOARD
-let scores = { You: 0, Her: 0, Draws: 0 };
-document.getElementById("leaderboardForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const result = winner.value;
-  if (result === "You") scores.You += 3;
-  else if (result === "Her") scores.Her += 3;
-  else if (result === "Draw") { scores.You += 1; scores.Her += 1; scores.Draws += 1; }
-  scoreYou.textContent = scores.You;
-  scoreHer.textContent = scores.Her;
-  drawCount.textContent = scores.Draws;
-  await addDoc(collection(window.db, "leaderboard"), { result, scores: { ...scores }, timestamp: Date.now() });
-});
-document.getElementById("resetLeaderboard").addEventListener("click", () => {
-  if (confirm("Reset leaderboard?")) {
-    scores = { You: 0, Her: 0, Draws: 0 };
-    scoreYou.textContent = 0;
-    scoreHer.textContent = 0;
-    drawCount.textContent = 0;
-  }
+// 🎁 Wishlist
+loadCollection("wishlist", data => {
+  const li = document.createElement("li");
+  li.innerHTML = `<a href="\${data.link}" target="_blank"><strong>\${data.title}</strong></a> - \${data.note}`;
+  document.getElementById("wishlistItems").appendChild(li);
 });
 
-// BIBLE STUDY JOURNAL
-document.getElementById("bibleJournalForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const verse = bibleVerse.value.trim();
-  const note = bibleNote.value.trim();
-  if (verse && note) {
-    const entry = document.createElement("div");
-    entry.innerHTML = `<strong>${verse}</strong><p>${note}</p>`;
-    bibleJournalEntries.prepend(entry);
-    bibleJournalForm.reset();
-    await addDoc(collection(window.db, "bibleJournal"), { verse, note, timestamp: Date.now() });
-  }
+// 💰 Savings Tracker
+loadCollection("savings", data => {
+  const div = document.createElement("div");
+  const percent = (data.saved / data.goal * 100).toFixed(0);
+  div.innerHTML = `<p>${data.title}: £${data.saved} / £${data.goal} (${percent}%)</p>`;
+  document.getElementById("savingsGoals").appendChild(div);
 });
 
-// PRAYER WARRIOR
-document.getElementById("prayerWarriorForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = warriorTitle.value.trim();
-  const verse = warriorVerse.value.trim();
-  const note = warriorNote.value.trim();
-  if (title && verse) {
-    const item = document.createElement("div");
-    item.innerHTML = `<h4>${title}</h4><p><strong>${verse}</strong></p>${note ? `<small>${note}</small>` : ""}`;
-    prayerWarriorList.prepend(item);
-    prayerWarriorForm.reset();
-    await addDoc(collection(window.db, "prayerWarrior"), { title, verse, note, timestamp: Date.now() });
-  }
+// 📅 Achievements
+loadCollection("achievements", data => {
+  const div = document.createElement("div");
+  div.innerHTML = `<strong>${data.date}</strong>: ${data.title} - ${data.note}`;
+  document.getElementById("achievementsTimeline").appendChild(div);
 });
 
-// PERSONAL PRAYERS
-document.getElementById("prayerForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const prayer = prayerText.value.trim();
-  if (prayer) {
-    const item = document.createElement("li");
-    item.textContent = prayer;
-    prayerList.prepend(item);
-    prayerForm.reset();
-    await addDoc(collection(window.db, "prayers"), { prayer, timestamp: Date.now() });
-  }
+// 💑 Couple Journal
+loadCollection("coupleJournal", data => {
+  const div = document.createElement("div");
+  div.innerHTML = `<p>${data.entry}</p>`;
+  document.getElementById("journalEntries").appendChild(div);
 });
 
-// CHRISTIAN SONGS
-document.getElementById("songForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const title = songTitle.value.trim();
-  const link = songLink.value.trim();
-  if (title && link) {
-    const item = document.createElement("li");
-    item.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
-    songList.appendChild(item);
-    songForm.reset();
-    await addDoc(collection(window.db, "songs"), { title, link, timestamp: Date.now() });
-  }
+// 🏆 Leaderboard
+loadCollection("leaderboard", data => {
+  const li = document.createElement("li");
+  li.textContent = `${data.name}: ${data.points} pts`;
+  document.getElementById("leaderboardList").appendChild(li);
 });
 
+// 📖 Daily Bible Verse
+const verses = [
+  "Psalm 46:1 – God is our refuge and strength, a very present help in trouble.",
+  "Isaiah 41:10 – Fear not, for I am with you...",
+  "Romans 8:28 – All things work together for good...",
+  "John 3:16 – For God so loved the world...",
+];
+const dailyVerse = verses[new Date().getDate() % verses.length];
+document.getElementById("dailyVerse").innerHTML = `<em>${dailyVerse}</em>`;
 
-});
+// 🎡 Spin the Wheel
+function spinWheel() {
+  const ideas = ["Movie Night", "Online Game", "Virtual Picnic", "Watch Party", "Cooking Together"];
+  const chosen = ideas[Math.floor(Math.random() * ideas.length)];
+  document.getElementById("wheelResult").textContent = "Tonight's date: " + chosen;
+}
+window.spinWheel = spinWheel;
