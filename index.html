@@ -1,65 +1,85 @@
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Princess and Mr Machete</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>The Princess and Mr Machete</h1>
+    <h3>Ecclesiastes 4:12 – "And though a man might prevail against one who is alone, two will withstand him—a threefold cord is not quickly broken."</h3>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCmgiOgNife84aqECuBMof3Hjx-iNy8NPQ",
-    authDomain: "princessmrmacheteapp.firebaseapp.com",
-    projectId: "princessmrmacheteapp",
-    storageBucket: "princessmrmacheteapp.appspot.com",
-    messagingSenderId: "397581062474",
-    appId: "1:397581062474:web:dadc5ce6378abefad0f1b3",
-    measurementId: "G-G90TVY0ZCF"
-  };
+    <section>
+      <h2>Bible Journal</h2>
+      <div id="bibleJournalEntries"></div>
+    </section>
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore(app);
-  window.db = db;
+    <section>
+      <h2>Personal Prayers</h2>
+      <ul id="prayerList"></ul>
+    </section>
 
-  // Load Bible Journal Entries
-  const bibleJournalEntries = document.getElementById("bibleJournalEntries");
-  getDocs(collection(db, "bibleJournal")).then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const entry = document.createElement("div");
-      entry.innerHTML = `<strong>${data.verse}</strong><p>${data.note}</p>`;
-      bibleJournalEntries.appendChild(entry);
+    <section>
+      <h2>Wishlist</h2>
+      <ul id="wishlistItems"></ul>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCmgiOgNife84aqECuBMof3Hjx-iNy8NPQ",
+      authDomain: "princessmrmacheteapp.firebaseapp.com",
+      projectId: "princessmrmacheteapp",
+      storageBucket: "princessmrmacheteapp.appspot.com",
+      messagingSenderId: "397581062474",
+      appId: "1:397581062474:web:dadc5ce6378abefad0f1b3",
+      measurementId: "G-G90TVY0ZCF"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    window.db = db;
+
+    // Load Bible Journal
+    getDocs(collection(db, "bibleJournal")).then(snapshot => {
+      const journalSection = document.getElementById("bibleJournalEntries");
+      snapshot.forEach(doc => {
+        const { verse, note } = doc.data();
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${verse}</strong><p>${note}</p>`;
+        journalSection.appendChild(div);
+      });
     });
-  });
 
-  // Load Prayer Warrior Entries
-  const prayerWarriorList = document.getElementById("prayerWarriorList");
-  getDocs(collection(db, "prayerWarrior")).then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const entry = document.createElement("div");
-      entry.innerHTML = `<h4>${data.title}</h4><p><strong>${data.verse}</strong></p><small>${data.note}</small>`;
-      prayerWarriorList.appendChild(entry);
+    // Load Personal Prayers
+    getDocs(collection(db, "prayers")).then(snapshot => {
+      const prayerList = document.getElementById("prayerList");
+      snapshot.forEach(doc => {
+        const { prayer } = doc.data();
+        const li = document.createElement("li");
+        li.textContent = prayer;
+        prayerList.appendChild(li);
+      });
     });
-  });
 
-  // Load Personal Prayers
-  const prayerList = document.getElementById("prayerList");
-  getDocs(collection(db, "prayers")).then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const item = document.createElement("li");
-      item.textContent = data.prayer;
-      prayerList.appendChild(item);
+    // Load Wishlist
+    getDocs(collection(db, "wishlist")).then(snapshot => {
+      const wishlist = document.getElementById("wishlistItems");
+      snapshot.forEach(doc => {
+        const { title, link, note } = doc.data();
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="\${link}" target="_blank"><strong>\${title}</strong></a>\${note ? '<br><small>' + note + '</small>' : ''}`;
+        wishlist.appendChild(li);
+      });
     });
-  });
+  </script>
 
-  // Load Christian Songs
-  const songList = document.getElementById("songList");
-  getDocs(collection(db, "songs")).then(snapshot => {
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const item = document.createElement("li");
-      item.innerHTML = `<a href="${data.link}" target="_blank">${data.title}</a>`;
-      songList.appendChild(item);
-    });
-  });
-</script>
-<script src="script.js"></script>
+</body>
+</html>
